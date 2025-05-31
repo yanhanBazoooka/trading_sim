@@ -1,0 +1,39 @@
+/* Custom styles for Trading Simulator */
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.display-4 {
+    font-size: 2.5rem;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.card-title {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Custom colors for positive/negative values */
+.positive {
+    color: #27ae60;
+}
+
+.negative {
+    color: #c0392b;
+}
+
+/* Chart container */
+canvas {
+    width: 100% !important;
+    height: 400px !important;
+    margin: 20px 0;
+} 
