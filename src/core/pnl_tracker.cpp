@@ -1,6 +1,7 @@
 #include "core/pnl_tracker.hpp"
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <iostream>
 
 using json = nlohmann::json;
 
@@ -30,10 +31,17 @@ void PnLTracker::record_fill(const Order& order) {
         order.side == OrderSide::BUY ? "BUY" : "SELL",
         trade_pnl
     });
+
+    std::cout << "Recorded trade: id=" << order.id 
+              << " pnl=" << trade_pnl
+              << " net_pos=" << net_position 
+              << " avg_cost=" << avg_cost << "\n";
 }
 
 void PnLTracker::export_json(const std::string& summary_path,
                              const std::string& trades_path) const {
+    std::cout << "Creating trade log with " << trade_log.size() << " trades\n";
+    
     json trades_json = json::array();
     for (const auto& t : trade_log) {
         trades_json.push_back({
@@ -47,7 +55,13 @@ void PnLTracker::export_json(const std::string& summary_path,
     }
 
     std::ofstream trades_out(trades_path);
+    if (!trades_out.is_open()) {
+        std::cerr << "Failed to open trades file: " << trades_path << "\n";
+        return;
+    }
     trades_out << trades_json.dump(2);
+    trades_out.close();
+    std::cout << "Wrote " << trade_log.size() << " trades to " << trades_path << "\n";
 
     json summary = {
         {"net_position", net_position},
@@ -57,5 +71,11 @@ void PnLTracker::export_json(const std::string& summary_path,
     };
 
     std::ofstream summary_out(summary_path);
+    if (!summary_out.is_open()) {
+        std::cerr << "Failed to open summary file: " << summary_path << "\n";
+        return;
+    }
     summary_out << summary.dump(2);
+    summary_out.close();
+    std::cout << "Wrote summary to " << summary_path << "\n";
 }

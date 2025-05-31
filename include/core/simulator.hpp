@@ -13,6 +13,8 @@ public:
 
     void run(const std::vector<Tick>& ticks);
     void write_outputs(const std::string& outdir = "output");
+    void export_results(const std::string& summary_path, const std::string& trades_path) const;
+
 
 private:
     std::unique_ptr<StrategyEngine> strategy_;

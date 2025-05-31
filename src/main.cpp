@@ -2,26 +2,35 @@
 #include "core/simulator.hpp"
 #include "strategy/vwap_strategy.hpp"
 
-#include <iostream>
 #include <memory>
-#include <fstream>
-
+#include <filesystem>
+#include <iostream>
 
 int main() {
-    auto ticks = load_ticks("../data/aapl_0930_0935.csv");
-    std::cout << "loaded " << ticks.size() << " ticks\n";
+    std::string tick_path = "../data/aapl_0930_0935.csv";
+    std::string out_dir = "../output/";
 
+    std::cout << "Loading ticks from: " << std::filesystem::absolute(tick_path) << std::endl;
+    std::vector<Tick> ticks = load_ticks(tick_path);
+    
     if (ticks.empty()) {
-        std::cerr << "no tick data loaded, aborting.\n";
+        std::cerr << "no ticks loaded\n";
         return 1;
     }
 
-    auto strategy = std::make_unique<VWAPStrategy>();
-    SimulatorEngine engine(std::move(strategy));
+    std::cout << "Successfully loaded " << ticks.size() << " ticks\n";
 
-    engine.run(ticks);
-    engine.write_outputs("../output");
+    auto strategy = std::make_unique<VWAPStrategy>(
+        10000,                                      // target size
+        "2025-05-28T09:30:00",                      // start time (UTC)
+        "2025-05-28T09:35:00"                       // end time 
+    );
 
-    std::cout << "✅ simulation complete. results written to /output\n";
+    SimulatorEngine sim(std::move(strategy));
+    sim.run(ticks);
+
+    std::filesystem::create_directory(out_dir);
+    sim.export_results(out_dir + "summary.json", out_dir + "trades.json");
+
     return 0;
 }
