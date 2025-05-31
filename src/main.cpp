@@ -5,6 +5,8 @@
 #include <memory>
 #include <filesystem>
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 int main() {
     std::string tick_path = "../data/aapl_0930_0935.csv";
@@ -23,11 +25,18 @@ int main() {
     auto strategy = std::make_unique<VWAPStrategy>(
         10000,                                      // target size
         "2025-05-28T09:30:00",                      // start time (UTC)
-        "2025-05-28T09:35:00"                       // end time 
+        "2025-05-28T09:35:00"                       // end time (UTC)
     );
 
     SimulatorEngine sim(std::move(strategy));
-    sim.run(ticks);
+
+    // Process ticks one by one with a small delay to simulate real-time
+    for (const auto& tick : ticks) {
+        sim.process_tick(tick);
+        
+        // Optional: Add a small delay between ticks (e.g., 100ms)
+        // std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 
     std::filesystem::create_directory(out_dir);
     sim.export_results(out_dir + "summary.json", out_dir + "trades.json");

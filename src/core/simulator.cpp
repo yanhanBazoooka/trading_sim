@@ -4,33 +4,20 @@
 SimulatorEngine::SimulatorEngine(std::unique_ptr<StrategyEngine> strategy)
     : strategy_(std::move(strategy)) {}
 
-void SimulatorEngine::run(const std::vector<Tick>& ticks) {
-    std::cout << "Starting simulation with " << ticks.size() << " ticks\n";
-    int orders_generated = 0;
-    int orders_filled = 0;
+void SimulatorEngine::process_tick(const Tick& tick) {
+    Order order = strategy_->generate_order(tick, tick_counter++);
 
-    for (size_t i = 0; i < ticks.size(); ++i) {
-        const Tick& tick = ticks[i];
-        Order order = strategy_->generate_order(tick, i);
-
-        if (order.size > 0) {
-            orders_generated++;
-            order.id = order_id_counter++;
-            order.price = tick.price; // market execution for phase 1
-            pnl_tracker_.record_fill(order);
-            orders_filled++;
-            
-            std::cout << "Filled order: id=" << order.id
-                      << " size=" << order.size
-                      << " price=" << order.price
-                      << " side=" << (order.side == OrderSide::BUY ? "BUY" : "SELL")
-                      << "\n";
-        }
+    if (order.size > 0) {
+        order.id = order_id_counter++;
+        order.price = tick.price; // market execution for phase 1
+        pnl_tracker_.record_fill(order);
+        
+        std::cout << "Filled order: id=" << order.id
+                  << " size=" << order.size
+                  << " price=" << order.price
+                  << " side=" << (order.side == OrderSide::BUY ? "BUY" : "SELL")
+                  << "\n";
     }
-    
-    std::cout << "Simulation complete:\n"
-              << "  Orders generated: " << orders_generated << "\n"
-              << "  Orders filled: " << orders_filled << "\n";
 }
 
 void SimulatorEngine::export_results(const std::string& summary_path, 
