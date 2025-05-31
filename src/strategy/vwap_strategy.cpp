@@ -1,4 +1,5 @@
 #include "strategy/vwap_strategy.hpp"
+#include <iostream>
 
 Order VWAPStrategy::generate_order(const Tick& tick, int tick_index) {
     // update internal VWAP state
@@ -19,6 +20,10 @@ Order VWAPStrategy::generate_order(const Tick& tick, int tick_index) {
             .price = tick.price
         };
     }
+    // Debugging
+    // std::cout << "[VWAP] tick " << tick_index
+    //       << " price=" << tick.price
+    //       << " vwap=" << vwap << "\n";
 
     return Order{-1, "", OrderType::MARKET, OrderSide::BUY, 0, 0.0}; // no-op
 }
